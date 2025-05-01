@@ -3,6 +3,9 @@
 
 TerraSample is a generic portfolio project demonstrating a modular approach to infrastructure management using Terraform. This project serves as a template for showcasing best practices and standard module organization for a two tier cloud infrastructure.
 
+![image](https://github.com/user-attachments/assets/ede43305-7678-4aa8-bd35-250ab8e4a12a)
+
+
 ## Project Structure
 ```
 .
