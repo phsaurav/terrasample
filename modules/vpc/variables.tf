@@ -1,94 +1,62 @@
-# * VPC variables
-variable "vpc_name" {
-  description = "Name of the VPC"
+variable "region" {
+  description = "Region where the resource(s) will be managed. Defaults to the region set in the provider configuration"
   type        = string
 }
 
-variable "vpc_cidr" {
-  description = "VPC CIDR range"
+
+################################################################################
+# VPC
+################################################################################
+variable "name" {
+  description = "Name to be used on all the resources as identifier"
+  type        = string
+  default     = ""
+}
+
+variable "cidr" {
+  description = "(Optional) The IPv4 CIDR block for the VPC. CIDR can be explicitly set or it can be derived from IPAM using `ipv4_netmask_length` & `ipv4_ipam_pool_id`"
   type        = string
   default     = "10.0.0.0/16"
 }
 
-variable "vpc_public_subnets" {
-  description = "List of public subnet CIDR ranges"
+variable "public_subnets" {
+  description = "A list of public subnets inside the VPC"
   type        = list(string)
-  default     = ["10.0.0.0/20", "10.0.16.0/20", "10.0.32.0/20"]
 }
 
-variable "vpc_private_subnets" {
-  description = "List of private subnet CIDR ranges"
+variable "private_subnets" {
+  description = "A list of private subnets inside the VPC"
   type        = list(string)
-  default     = ["10.0.128.0/20", "10.0.144.0/20", "10.0.160.0/20"]
 }
 
+variable "database_subnets" {
+  description = "A list of database subnets inside the VPC"
+  type        = list(string)
+  default     = []
+}
 
 variable "vpc_tags" {
-  description = "Tags to apply to vpc peering for api x data vpc"
+  description = "Additional tags for the VPC"
   type        = map(string)
 }
 
-variable "vpc_single_nat_gateway" {
-  description = "Should vpc keep one shared nat gateway"
-  type        = bool
-  default     = true
-}
-
-variable "vpc_one_natgateway_per_az" {
-  description = "One Nat Gateway Per AZ for high relaiability"
+################################################################################
+# NAT Gateway
+################################################################################
+variable "enable_nat_gateway" {
+  description = "Should be true if you want to provision NAT Gateways for each of your private networks"
   type        = bool
   default     = false
 }
 
-# * API Gateway Variables
-variable "agw_sg_name" {
-  description = "Name of the API Gateway Security Group"
-  type        = string
-  default     = "agw_sg"
-}
-
-variable "agw_name" {
-  description = "Name of the API Gateway"
-  type        = string
-}
-
-variable "stage_name" {
-  description = "Stage Name of the API Gateway"
-  type        = string
-}
-
-variable "hosted_zone_name" {
-  description = "Name of the Hosted Zone of the domain"
-  type        = string
-}
-
-variable "domain_name" {
-  description = "Domain name for API Gateway"
-  type        = string
-}
-
-variable "domain_certificate_arn" {
-  description = "Domain Name Certification ARN"
-  type        = string
-}
-
-variable "agw_vpc_link_name" {
-  description = "Name of the API Gateway VPC Link"
-  type        = string
-  default     = "agw_vpc_link"
-}
-variable "alb_listeners_arn" {
-  description = "Name of the API Gateway VPC Link"
-  type        = string
-}
-
-variable "enable_nat_gateway" {
-  description = "NAT Gateway or NAT Instance"
+variable "single_nat_gateway" {
+  description = "Should be true if you want to provision a single shared NAT Gateway across all of your private networks"
   type        = bool
+  default     = true
 }
 
-variable "nat_instance_image_id" {
-  description = "NAT instance image id"
-  type        = string
-  default     = "ami-01ca4016fdc24128c"
+variable "one_nat_gateway_per_az" {
+  description = "Should be true if you want only one NAT Gateway per availability zone. Requires `var.azs` to be set, and the number of `public_subnets` created to be greater than or equal to the number of availability zones specified in `var.azs`"
+  type        = bool
+  default     = false
 }
