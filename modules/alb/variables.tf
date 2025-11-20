@@ -20,12 +20,9 @@ variable "enable_deletion_protection" {
 }
 
 variable "security_group_ingress_rules" {
-  type = map(object({}))
+  type = any
 }
 
-variable "alb_listeners" {
-  type = map(object({}))
-}
 
 variable "container_port" {
   description = "Conainer Port for Target Group"

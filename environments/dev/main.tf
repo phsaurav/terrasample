@@ -64,29 +64,6 @@ module "alb" {
     }
   }
 
-  alb_listeners = {
-    ex_ecs = {
-      backend_protocol                  = "HTTP"
-      backend_port                      = 8000
-      target_type                       = "ip"
-      deregistration_delay              = 5
-      load_balancing_cross_zone_enabled = true
-
-      health_check = {
-        enabled             = true
-        healthy_threshold   = 5
-        interval            = 30
-        matcher             = "200"
-        path                = "/"
-        port                = "traffic-port"
-        protocol            = "HTTP"
-        timeout             = 5
-        unhealthy_threshold = 2
-      }
-
-      create_attachment = false
-    }
-  }
 }
 
 

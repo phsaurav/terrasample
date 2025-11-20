@@ -16,24 +16,36 @@ module "alb" {
   security_group_egress_rules = {
     all = {
       ip_protocol = "-1"
-      cidr_ipv4   = var.vpc_cidr
+      cidr_ipv4   = "10.0.0.0/16"
     }
   }
 
-  listeners = var.alb_listeners
+  listeners = {
+    http = {
+      port     = 80
+      protocol = "HTTP"
+
+      forward = {
+        target_group_key = "ex_ecs"
+      }
+    }
+  }
+
 
   target_groups = {
     ex_ecs = {
+      name                              = "dc-app-tg"
       backend_protocol                  = "HTTP"
       backend_port                      = var.container_port
       target_type                       = "ip"
       deregistration_delay              = 5
       load_balancing_cross_zone_enabled = true
+      vpc_id                            = var.vpc_id
 
       health_check = {
         enabled             = true
         healthy_threshold   = 5
-        interval            = 30
+        interval            = 180
         matcher             = "200"
         path                = "/"
         port                = "traffic-port"
