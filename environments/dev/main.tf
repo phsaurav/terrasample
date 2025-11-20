@@ -100,7 +100,7 @@ module "ecs" {
     execute_command_configuration = {
       logging = "OVERRIDE"
       log_configuration = {
-        cloud_watch_log_group_name = modules.cloudwatch.log_group_name
+        cloud_watch_log_group_name = module.cloudwatch.log_group_name
       }
     }
   }
@@ -112,6 +112,64 @@ module "ecs" {
     }
     FARGATE_SPOT = {
       weight = 1
+    }
+  }
+
+  services = {
+    dc-app = {
+      cpu    = 1024
+      memory = 2048
+
+      container_definitions = {
+        dc-app = {
+          cpu       = 1024
+          memory    = 2048
+          essential = true
+          image     = "${module.ecr.repository_url}:latest"
+          portMappings = [
+            {
+              name          = "dc-app"
+              containerPort = 8000
+              protocol      = "tcp"
+            }
+          ]
+          enable_cloudwatch_logging   = true
+          create_cloudwatch_log_group = false
+          cloud_watch_log_group_name  = module.cloudwatch.log_group_name
+
+          secrets = [
+            {
+              name      = "WEATHER_API_KEY"
+              valueFrom = "arn:aws:ssm:us-west-2:648539820216:parameter/dhaka-celsius/weather-api-key"
+            }
+          ]
+
+          load_balancer = {
+            service = {
+              target_group_arn = module.alb.tg_arn
+              container_name   = "dc-app"
+              container_port   = 8000
+            }
+          }
+          subnet_ids = module.vpc.private_subnets
+
+          security_group_ingress_rules = {
+            alb_ingress = {
+              description                  = "Service port"
+              from_port                    = 8000
+              ip_protocol                  = "tcp"
+              referenced_security_group_id = module.alb.security_group_id
+            }
+          }
+          security_group_egress_rules = {
+            all = {
+              ip_protocol = "-1"
+              cidr_ipv4   = "0.0.0.0/0"
+            }
+          }
+          tags = local.tags
+        }
+      }
     }
   }
 }

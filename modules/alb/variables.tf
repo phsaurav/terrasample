@@ -20,11 +20,11 @@ variable "enable_deletion_protection" {
 }
 
 variable "security_group_ingress_rules" {
-  type = map(object())
+  type = map(object({}))
 }
 
 variable "alb_listeners" {
-  type = map(object())
+  type = map(object({}))
 }
 
 variable "container_port" {

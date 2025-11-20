@@ -10,6 +10,7 @@ module "vpc" {
 
   name                   = var.name
   azs                    = local.azs
+  cidr                   = var.cidr
   public_subnets         = var.public_subnets
   private_subnets        = var.private_subnets
   single_nat_gateway     = var.single_nat_gateway
