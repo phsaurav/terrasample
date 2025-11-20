@@ -4,17 +4,17 @@
 
 output "vpc_id" {
   description = "The ID of the VPC"
-  value       = try(module.vpc.this[0].id, null)
+  value       = module.vpc.vpc_id
 }
 
 output "vpc_arn" {
   description = "The ARN of the VPC"
-  value       = try(module.vpc.this[0].arn, null)
+  value       = module.vpc.vpc_arn
 }
 
 output "vpc_cidr_block" {
   description = "The CIDR block of the VPC"
-  value       = try(module.vpc.this[0].cidr_block, null)
+  value       = module.vpc.vpc_cidr_block
 }
 
 ################################################################################
@@ -22,17 +22,21 @@ output "vpc_cidr_block" {
 ################################################################################
 output "public_subnets" {
   description = "List of IDs of public subnets"
-  value       = compact(module.vpc.public_subnets)
+  value       = module.vpc.public_subnets
 }
 
 output "private_subnets" {
   description = "A list of all private subnets"
-  value       = compact(module.vpc.private_subnets)
+  value       = module.vpc.private_subnets
+}
+
+output "private_subnet_cidr_blocks" {
+  value = module.vpc.private_subnets_cidr_blocks
 }
 
 output "database_subnets" {
   description = "A list of all database subnets"
-  value       = compact(module.vpc.database_subnets)
+  value       = module.vpc.database_subnets
 }
 
 

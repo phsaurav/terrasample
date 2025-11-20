@@ -13,7 +13,7 @@ output "dns_name" {
 
 output "tg_arn" {
   description = "ARN of the target group"
-  value       = module.alb.target_groups.arn
+  value       = module.alb.target_groups["ex_ecs"].arn
 }
 
 output "security_group_id" {

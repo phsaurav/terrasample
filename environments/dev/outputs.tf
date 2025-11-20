@@ -1,9 +1,13 @@
+
 output "repository_url" {
   description = "The URL of the repository"
   value       = module.ecr.repository_url
 }
 
 # VPC
+output "vpc_id" {
+  value = module.vpc.vpc_id
+}
 output "public_subnets" {
   description = "List of IDs of public subnets"
   value       = compact(module.vpc.public_subnets)

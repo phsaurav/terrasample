@@ -19,20 +19,4 @@ module "vpc" {
   tags                   = var.vpc_tags
 }
 
-resource "aws_security_group" "ec2-instance-connect-sg" {
-  name        = "ec2-instance-connect-sg"
-  description = "Security group for EC2 instance connect"
-  vpc_id      = module.vpc.vpc_id
 
-  egress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = module.vpc.private_subnets_cidr_blocks
-  }
-}
-
-resource "aws_ec2_instance_connect_endpoint" "dc-ec2-connect" {
-  subnet_id          = module.vpc.private_subnets[0]
-  security_group_ids = [aws_security_group.ec2-instance-connect-sg.id]
-}
