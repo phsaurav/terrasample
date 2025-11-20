@@ -97,14 +97,41 @@ module "ecs" {
       cpu    = 1024
       memory = 2048
 
-      subnet_ids = module.vpc.private_subnets
+      subnet_ids                 = module.vpc.private_subnets
+      create_security_group      = false
+      create_task_execution_role = true
+      create_task_exec_policy    = true
+      security_group_ids         = [aws_security_group.ecs_task_sg.id]
+      enable_execute_command     = true
+
+      task_exec_iam_role_policies = {
+        ecs_exec_baseline = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+      }
+      task_exec_ssm_param_arns = [
+        aws_ssm_parameter.api_key.arn
+      ]
+
+      load_balancer = {
+        service = {
+          target_group_arn = module.alb.tg_arn
+          container_name   = "dc-app"
+          container_port   = 8000
+        }
+      }
+
       container_definitions = {
         dc-app = {
           cpu       = 1024
           memory    = 2048
           essential = true
-          image     = "${module.ecr.repository_url}:latest"
-          command   = ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+          # image     = "hashicorp/http-echo:0.2.3"
+          # command = [
+          #   "-listen", ":8000",
+          #   "-text", "Hello from ECS!"
+          # ]
+
+          image   = "648539820216.dkr.ecr.us-west-2.amazonaws.com/dc-ecr-repo:d53d3ff5ac94b1b820064fed422994fa7c49350c"
+          command = ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
           portMappings = [
             {
               name          = "dc-app"
@@ -130,29 +157,6 @@ module "ecs" {
             }
           ]
 
-          load_balancer = {
-            service = {
-              target_group_arn = module.alb.tg_arn
-              container_name   = "dc-app"
-              container_port   = 8000
-            }
-          }
-
-
-          security_group_ingress_rules = {
-            alb_ingress = {
-              description                  = "Service port"
-              from_port                    = 8000
-              ip_protocol                  = "tcp"
-              referenced_security_group_id = module.alb.security_group_id
-            }
-          }
-          security_group_egress_rules = {
-            all = {
-              ip_protocol = "-1"
-              cidr_ipv4   = "0.0.0.0/0"
-            }
-          }
           tags = local.tags
         }
       }
@@ -185,12 +189,21 @@ resource "aws_security_group" "ecs_task_sg" {
   name        = "ecs-task-sg"
   description = "Security group for ECS tasks"
   vpc_id      = module.vpc.vpc_id
-  # EGRESS rule - allow traffic FROM ECS tasks TO VPC endpoints
+  # allow ALB to reach the task port
+  ingress {
+    description     = "Service port"
+    from_port       = 8000
+    to_port         = 8000
+    protocol        = "tcp"
+    security_groups = [module.alb.security_group_id]
+  }
+  # allow tasks to talk to SSM/KMS endpoints over HTTPS
   egress {
+    description = "Interface endpoints"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # or specifically to vpc_endpoints_sg
+    cidr_blocks = ["0.0.0.0/0"]
   }
   tags = {
     Name = "ecs-task-sg"
@@ -242,7 +255,20 @@ resource "aws_vpc_endpoint" "ec2messages" {
   }
 }
 
+resource "aws_vpc_endpoint" "kms" {
+  vpc_id              = module.vpc.vpc_id
+  service_name        = "com.amazonaws.${var.region}.kms"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = module.vpc.private_subnets
+  security_group_ids  = [aws_security_group.vpc_endpoints_sg.id]
+  private_dns_enabled = true
+  tags = {
+    Name = "kms-endpoint"
+  }
+}
+
 resource "aws_ec2_instance_connect_endpoint" "dc-ec2-connect" {
   subnet_id          = module.vpc.private_subnets[0]
   security_group_ids = [aws_security_group.ec2-instance-sg.id]
 }
+
