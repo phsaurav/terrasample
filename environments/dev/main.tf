@@ -32,7 +32,7 @@ module "vpc" {
   source = "../../modules/vpc"
 
   region          = var.region
-  name            = "al-vpc"
+  name            = "al-dev-vpc"
   cidr            = "10.0.0.0/16"
   private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
   public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
@@ -174,7 +174,7 @@ module "vpc" {
 ################################################################################
 # Security group for VPC endpoints - ALLOWS INCOMING traffic from ECS tasks
 resource "aws_security_group" "vpc_endpoints_sg" {
-  name        = "dc-vpc-endpoints-sg"
+  name        = "al-vpc-endpoints-sg"
   description = "Security group for VPC endpoints"
   vpc_id      = module.vpc.vpc_id
   # INGRESS rule - allow traffic FROM ECS tasks TO this endpoint
@@ -216,7 +216,6 @@ resource "aws_security_group" "vpc_endpoints_sg" {
 # }
 
 
-
 resource "aws_security_group" "ec2-instance-sg" {
   name        = "ec2-instance-connect-sg"
   description = "Security group for EC2 instance connect"
@@ -229,8 +228,6 @@ resource "aws_security_group" "ec2-instance-sg" {
     cidr_blocks = module.vpc.private_subnet_cidr_blocks
   }
 }
-
-
 
 
 resource "aws_ec2_instance_connect_endpoint" "dc-ec2-connect" {
