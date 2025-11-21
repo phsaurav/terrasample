@@ -1,7 +1,17 @@
 
-output "repository_url" {
-  description = "The URL of the repository"
-  value       = module.ecr.repository_url
+output "auth_repository_url" {
+  description = "The URL of the Auth repository"
+  value       = module.auth-ecr.repository_url
+}
+
+output "order_repository_url" {
+  description = "The URL of the Order repository"
+  value       = module.order-ecr.repository_url
+}
+
+output "product_repository_url" {
+  description = "The URL of the Product repository"
+  value       = module.product-ecr.repository_url
 }
 
 # VPC

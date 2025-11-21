@@ -1,5 +1,5 @@
-resource "aws_ecr_repository" "dc-ecr-repo" {
-  name                 = "dc-ecr-repo"
+resource "aws_ecr_repository" "this" {
+  name                 = var.repository_name
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
@@ -7,8 +7,8 @@ resource "aws_ecr_repository" "dc-ecr-repo" {
   }
 }
 
-resource "aws_ecr_lifecycle_policy" "dc-ecr-retention" {
-  repository = aws_ecr_repository.dc-ecr-repo.name
+resource "aws_ecr_lifecycle_policy" "this" {
+  repository = aws_ecr_repository.this.name
 
   policy = <<EOF
 {
